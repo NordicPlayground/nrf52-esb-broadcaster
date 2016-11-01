@@ -22,35 +22,21 @@
 #include "boards.h"
 #include "radio.h"
 #include "pwm.h"
-#include "app_uart.h"
 
 #define NRF_LOG_MODULE_NAME "APP"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
+
+// To create a new network, use a unique network ID (in the range 0 - 65536)
+#define RF_NETWORK_ID    12
 
 enum {COMMAND_SET_DUTY_CYCLE = 1};
 
 #define SERVO_PWM_MAX 2350
 #define SERVO_PWM_MIN 650
 
-const uint8_t leds_list[LEDS_NUMBER] = LEDS_LIST;
-uint8_t led_nr;
-
 nrf_esb_payload_t rx_payload;
-
-void nrf_esb_error_handler(uint32_t err_code, uint32_t line)
-{
-    NRF_LOG_ERROR(" App failed at line %d with error code: 0x%08x\r\n",
-                   line, err_code);
-#if DEBUG //lint -e553
-    while(true);
-#else
-    NVIC_SystemReset();
-#endif
-}
     
-//#define APP_ERROR_CHECK(err_code) if(err_code) nrf_esb_error_handler(err_code, __LINE__);
-
 void clocks_start( void )
 {
     NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
@@ -74,11 +60,11 @@ void set_servo_value(uint32_t percentage)
 void radio_packet_received(uint8_t *data, uint32_t data_length)
 {
     uint32_t percentage;
-    // Write incoming data to the console
+    
     switch(data[0])
     {
-        // Set 
         case COMMAND_SET_DUTY_CYCLE:
+            // Set the duty cycle of the PWM according to the incoming packet
             if(data_length >= 3)
             {
                 percentage = (data[1] - '0') * 10 + (data[2] - '0');
@@ -113,8 +99,8 @@ int main(void)
     
     pwm0_set_duty_cycle(SERVO_PWM_MIN);
 
-    // Initialize the radio library with network ID 12
-    err_code = radio_init(12, radio_packet_received);
+    // Initialize the radio library with a network ID set by the RF_NETWORK_ID define
+    err_code = radio_init(RF_NETWORK_ID, radio_packet_received);
     APP_ERROR_CHECK(err_code);
     
     NRF_LOG_INFO(" Enhanced ShockBurst Broadcaster Example\r\n");
