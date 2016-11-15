@@ -1,4 +1,4 @@
-nrf51-esb-broadcaster
+nrf52-esb-broadcaster
 =====================
 Description
 -----------
@@ -13,11 +13,11 @@ There is no packet acknowledgement, and as such a transmitting device is unaware
 Requirements
 ------------
 - nRF5 SDK version 12.1.0
-- nRF52DK
+- nRF52 DK
 
 The project may need modifications to work with later versions or other boards. 
 
-To compile it, clone the repository in the /nRF5_SDK_12.1.0/examples/proprietary_rf/ folder (or any other subdirectory under /nRF5_SDK_12.1.0/examples/examples/)
+To compile it, clone the repository in the /nRF5_SDK_12.1.0/examples/proprietary_rf/ folder (or any other subdirectory under /nRF5_SDK_12.1.0/examples/)
 
 About this project
 ------------------
