@@ -22,10 +22,11 @@
 #include "boards.h"
 #include "radio.h"
 #include "pwm.h"
+#include "app_util.h"
 
-#define NRF_LOG_MODULE_NAME "APP"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
+#include "nrf_log_default_backends.h"
 
 // To create a new network, use a unique network ID (in the range 0 - 65536)
 #define RF_NETWORK_ID    12
@@ -53,7 +54,7 @@ void gpio_init( void )
 
 void set_servo_value(uint32_t percentage)
 {
-    NRF_LOG_INFO(" Send duty cycle: %i\r\n", percentage);
+    NRF_LOG_INFO("Set duty cycle: %i\r\n", percentage);
     pwm0_set_duty_cycle(percentage * (SERVO_PWM_MAX - SERVO_PWM_MIN) / 100 + SERVO_PWM_MIN);
 }
 
@@ -78,7 +79,7 @@ void send_servo_state(uint32_t percentage)
 {
     uint8_t rf_command[] = {COMMAND_SET_DUTY_CYCLE, (percentage / 10) + '0', (percentage % 10) + '0'};
     radio_packet_send(rf_command, 3);
-    NRF_LOG_INFO(" Sending servo update: %i\r\n", percentage);
+    NRF_LOG_INFO("Sending servo update: %i\r\n", percentage);
 }
 
 int main(void)
@@ -87,8 +88,11 @@ int main(void)
 
     gpio_init();
 
-    NRF_LOG_INIT(NULL);
-      
+    err_code = NRF_LOG_INIT(NULL);
+    APP_ERROR_CHECK(err_code);
+
+    NRF_LOG_DEFAULT_BACKENDS_INIT();
+    
     clocks_start();
     
     timer_init();
@@ -103,15 +107,16 @@ int main(void)
     err_code = radio_init(RF_NETWORK_ID, radio_packet_received);
     APP_ERROR_CHECK(err_code);
     
-    NRF_LOG_INFO(" Enhanced ShockBurst Broadcaster Example\r\n");
+    NRF_LOG_INFO("Enhanced ShockBurst Broadcaster Example\r\n");
 
     while (true)
     {              
-        // Check for console input
-        uint8_t new_command = NRF_LOG_GETCHAR();
-        if(new_command >= '0' && new_command <= '9')
-        {
-            send_servo_state((new_command - '0') * 10);
-        }
+        static uint32_t counter = 0;
+        send_servo_state(counter);
+        counter += 10;
+        if(counter >= 100) counter = 0;
+        nrf_gpio_pin_toggle(LED_1);
+        
+        nrf_delay_ms(500);
     }
 }
