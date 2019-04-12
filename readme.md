@@ -12,8 +12,8 @@ There is no packet acknowledgement, and as such a transmitting device is unaware
 
 Requirements
 ------------
-- nRF5 SDK version 12.1.0
-- nRF52 DK
+- nRF5 SDK version 15.3.0
+- nRF52 DK or nRF52840 DK
 
 The project may need modifications to work with later versions or other boards. 
 
